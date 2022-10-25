@@ -3,35 +3,45 @@ import styled from "styled-components";
 export const BadgeSectionWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  min-height: 464px;
+  justify-content: flex-end;
+  padding-right: 60px;
+  padding-left: 60px;
+  padding-top: 60px;
+  padding-bottom: 60px;
   width: 70%;
   background-color: #13203d;
   margin: auto;
   border-radius: 10px;
+`;
 
-  @media (max-width: 768px) {
+export const BadgeSectionContent = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-around;
+  gap: 40px;
+
+  @media (max-width: 1170px) {
     width: auto;
-    padding: 0 20px;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 30px;
+    padding-left: 30px;
   }
 `;
 
 export const BadgeSectionHeader = styled.h2`
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 20%;
+  padding-bottom: 10px;
   font-weight: 500;
   font-size: 26px;
   line-height: 150%;
-  text-align: center;
-  color: #7c87c4;
-`;
+  color: #ffffff;
 
-export const BadgeLIst = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 12px;
-`;
-
-export const Badge = styled.img`
-  width: 110px;
-  height: 106px;
+  @media (max-width: 1170px) {
+    padding-right: none;
+    justify-content: center;
+  }
 `;

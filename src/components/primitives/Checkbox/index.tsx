@@ -19,7 +19,7 @@ export const Checkbox = ({ label, checked, onChange }: CheckboxProps) => {
       <UnselectedCheckbox checked={checked} onChange={onChange} />
       <SelectedCheckbox checked={checked}>
         <CheckboxIcon>
-          <FaCheck color="white" />
+          <FaCheck color="white" fontSize="12px" />
         </CheckboxIcon>
       </SelectedCheckbox>
       <CheckboxWrapperLabel>{label}</CheckboxWrapperLabel>

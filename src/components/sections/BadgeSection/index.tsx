@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
+import { BadgeProfileHeader, BadgeListWrapper, BadgeImage } from "../../Badge";
 import {
-  BadgeProfileHeader,
-  BadgeCard,
   BadgeSectionWrapper,
-  BadgeList,
+  BadgeSectionContent,
   BadgeSectionHeader,
-} from "../../Badge";
+} from "./BadgeSection.styles";
+import { ToolTip } from "../../primitives";
 import { useWallet } from "../../../wallet";
 import { useFetch } from "../../../wallet/hooks";
 import { useSismoBadgeContract, useENS } from "../../../lib/hooks";
@@ -23,6 +23,13 @@ export const BadgeSection = () => {
     true
   );
 
+  // const multicallContract = useMulticallContract(
+  //   "0xeefBa1e63905eF1D7ACbA5a8513c70307C1cE441",
+  //   true
+  // );
+
+  // console.log('multicallContract aggregate', multicallContract);
+
   const { data: playgroundEnvData } = useFetch({
     url: "https://hub.playground.sismo.io/badges/polygon",
   });
@@ -32,115 +39,149 @@ export const BadgeSection = () => {
   });
 
   const wallet = useWallet();
-
   const activeAddress = wallet.connectedList[0].accounts[0].address;
+
   const truncatedAddress = truncateAddress(activeAddress);
 
-  const { ensName, ensAvatar, loading } = useENS(activeAddress);
+  const { ensName } = useENS(activeAddress);
 
   /* 
     fetch all non zero playground badge ids & their metadata 
   */
 
-  const [playgroundBadgeId, setPlaygroundBadgeId] = useState();
-  const [playgroundBadgeData, setPlaygroundBadgeData] = useState<any>();
+  const [playgroundMintedBadgeIds, setPlaygroundMintedBadgeIds] = useState([]);
+  const [playgroundBadgesData, setPlaygroundBadgesData] = useState([]);
 
   useEffect(() => {
-    if (playgroundEnvData && activeAddress) {
-      playgroundEnvData.items.map(async (token) => {
-        const balance = await getTokenBalance(
-          sismoPolygonBadgeContract,
-          activeAddress,
-          token.collectionId
+    async function fetchNonZeroTokenBalances() {
+      const nonZeroTokenIds = await Promise.all(
+        playgroundEnvData?.items.map(async (token) => {
+          const balance = await getTokenBalance(
+            sismoPolygonBadgeContract,
+            activeAddress,
+            token.collectionId
+          );
+          if (balance > 0) {
+            return token.collectionId;
+          }
+          return null;
+        })
+      );
+      const filteredTokenIds = nonZeroTokenIds.filter(
+        (balance) => balance !== null
+      );
+      setPlaygroundMintedBadgeIds(filteredTokenIds);
+    }
+
+    fetchNonZeroTokenBalances();
+  }, [playgroundEnvData?.items, activeAddress, sismoPolygonBadgeContract]);
+
+  useEffect(() => {
+    if (playgroundEnvData?.items && playgroundMintedBadgeIds) {
+      playgroundMintedBadgeIds.map(async (badgeId) => {
+        const badgeData = await playgroundEnvData.items.find(
+          (token) => token.collectionId === badgeId
         );
 
-        if (balance > 0) {
-          setPlaygroundBadgeId(token.collectionId);
+        if (badgeData) {
+          setPlaygroundBadgesData((playgroundBadgesData) => [
+            ...playgroundBadgesData,
+            badgeData,
+          ]);
         }
       });
     }
-  }, [sismoPolygonBadgeContract, activeAddress, playgroundEnvData]);
-
-  useEffect(() => {
-    if (playgroundEnvData) {
-      const getPlaygroundBadgeData = async () => {
-        const playgroundBadgeData = await playgroundEnvData.items.filter(
-          (token) => token.collectionId === playgroundBadgeId
-        );
-        setPlaygroundBadgeData(playgroundBadgeData);
-      };
-      getPlaygroundBadgeData();
-    }
-  }, [playgroundBadgeId, playgroundEnvData]);
+  }, [playgroundEnvData, playgroundMintedBadgeIds]);
 
   /* 
     fetch all non zero curated badge ids & their metadata 
   */
 
-  const [curatedBadgeId, setCuratedBadgeId] = useState();
-  const [curatedBadgeData, setCuratedBadgeData] = useState<any>();
+  const [curatedBadgeIds, setCuratedBadgeIds] = useState([]);
+  const [curatedBadgesData, setCuratedBadgesData] = useState([]);
 
   useEffect(() => {
-    if (curatedEnvData && activeAddress) {
-      curatedEnvData.items.map(async (token) => {
-        const balance = await getTokenBalance(
-          sismoCuratedBadgeContract,
-          activeAddress,
-          token.collectionId
-        );
-
-        if (balance > 0) {
-          setCuratedBadgeId(token.collectionId);
-        }
-      });
+    async function fetchNonZeroTokenBalances() {
+      const nonZeroTokenIds = await Promise.all(
+        curatedEnvData?.items.map(async (token) => {
+          const balance = await getTokenBalance(
+            sismoCuratedBadgeContract,
+            activeAddress,
+            token.collectionId
+          );
+          if (balance > 0) {
+            return token.collectionId;
+          }
+          return null;
+        })
+      );
+      const filteredTokenIds = nonZeroTokenIds.filter(
+        (balance) => balance !== null
+      );
+      setCuratedBadgeIds(filteredTokenIds);
     }
+
+    fetchNonZeroTokenBalances();
   }, [sismoCuratedBadgeContract, activeAddress, curatedEnvData]);
 
   useEffect(() => {
-    if (curatedEnvData) {
-      const getCuratedBadgeData = async () => {
-        const curatedBadgeData = await curatedEnvData.items.filter(
-          (token) => token.collectionId === curatedBadgeId
+    if (curatedEnvData?.items && curatedBadgeIds) {
+      curatedBadgeIds.map(async (badgeId) => {
+        const badgeData = await curatedEnvData.items.find(
+          (token) => token.collectionId === badgeId
         );
-        setCuratedBadgeData(curatedBadgeData);
-      };
-      getCuratedBadgeData();
+
+        if (badgeData) {
+          setCuratedBadgesData((curatedBadgesData) => [
+            ...curatedBadgesData,
+            badgeData,
+          ]);
+        }
+      });
     }
-  }, [curatedBadgeId, curatedEnvData]);
+  }, [curatedEnvData, curatedBadgeIds]);
 
   return (
     <BadgeSectionWrapper>
-      <BadgeProfileHeader
-        addressOrEns={ensName || truncatedAddress}
-        avatarSrc={
-          loading
-            ? "https://res.cloudinary.com/dp5xqavlz/image/upload/v1665603466/fallback-avatar_mjifmt.png"
-            : ensAvatar
-        }
-      />
-
-      <BadgeSectionHeader>My Badges</BadgeSectionHeader>
-      <BadgeList>
-        {playgroundBadgeData?.map((token) => (
-          <BadgeCard
-            key={token.collectionId}
-            title={token.name}
-            desc={token.description}
-            imgSrc={token.image}
-            imgAltText={token.name}
-          />
-        ))}
-
-        {curatedBadgeData?.map((token) => (
-          <BadgeCard
-            key={token.collectionId}
-            title={token.name}
-            desc={token.description}
-            imgSrc={token.image}
-            imgAltText={token.name}
-          />
-        ))}
-      </BadgeList>
+      <BadgeSectionHeader>My badges</BadgeSectionHeader>
+      <BadgeSectionContent>
+        <BadgeProfileHeader
+          addressOrEns={ensName || truncatedAddress}
+          avatarSrc="./ProfileIcon.png"
+          badges={9}
+          transactions={19}
+        />
+        <BadgeListWrapper>
+          {playgroundBadgesData?.map((token, i) => (
+            <ToolTip
+              key={i}
+              content={
+                <>
+                  <p>{token.name}</p>
+                  <p>{token.description}</p>
+                </>
+              }
+              placement="right"
+            >
+              <BadgeImage src={token.image} alt={token.name} />
+            </ToolTip>
+          ))}
+          {curatedBadgesData?.map((token, i) => (
+            <ToolTip
+              key={i}
+              content={
+                <>
+                  <p>{token.name}</p>
+                  <p>{token.description}</p>
+                </>
+              }
+              placement="right"
+            >
+              <BadgeImage src={token.image} alt={token.name} />
+            </ToolTip>
+          ))}
+        </BadgeListWrapper>
+      </BadgeSectionContent>
     </BadgeSectionWrapper>
   );
 };

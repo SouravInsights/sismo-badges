@@ -2,15 +2,15 @@ import styled from "styled-components";
 
 export const CheckboxWrapper = styled.label`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 `;
 
 export const CheckboxWrapperLabel = styled.label`
   cursor: pointer;
-  margin: 0 10px;
+  margin-left: 10px;
   font-style: normal;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 150%;
   color: #e9ecff;
 `;
@@ -32,9 +32,12 @@ export const UnselectedCheckbox = styled.input.attrs({ type: "checkbox" })`
 `;
 
 export const SelectedCheckbox = styled.div<any>`
-  display: inline-block;
-  width: 16px;
-  height: 16px;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  width: 11.31px;
+  height: 11.31px;
+
   background: ${(props) => (props.checked ? "#1a1f34" : "#3F4973")};
 
   padding: 4px;

@@ -3,7 +3,7 @@ import { ButtonProps } from ".";
 
 const VARIANT = {
   primary: css`
-    color: #13203d;
+    color: #e9ecff;
     background: #c08aff;
   `,
   secondary: css`
@@ -24,8 +24,11 @@ export const ButtonContainer = styled.button<ButtonProps>`
   cursor: pointer;
   border: none;
   border-radius: 5px;
-  font-weight: 600;
-  font-size: 16px;
+
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 150%;
+
   outline: none;
   transition: all 0.2s;
   box-sizing: border-box;

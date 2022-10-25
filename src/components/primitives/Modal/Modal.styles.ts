@@ -11,12 +11,13 @@ export const ModalContainer = styled.div`
   right: 0;
   top: 0;
   display: flex;
-  opacity: 1;
-  z-index: 400;
+  z-index: 1;
 `;
 
 export const ModalOverlay = styled.a`
-  backdrop-filter: blur(10px);
+  background: linear-gradient(285.82deg, #193970 -75.26%, #12203d 72.97%)
+    no-repeat fixed;
+  opacity: 0.72;
   bottom: 0;
   cursor: default;
   display: block;

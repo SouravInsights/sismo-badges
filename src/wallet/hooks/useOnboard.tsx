@@ -5,8 +5,6 @@ import walletConnectModule from "@web3-onboard/walletconnect";
 import { useEffect, useState } from "react";
 import { logo, icon } from "../assets/onboardAssets";
 
-const MAINNET_RPC_URL = `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`;
-
 const walletConnect = walletConnectModule();
 
 const injected = injectedModule();
@@ -23,7 +21,7 @@ const web3Onboard = Onboard({
       id: "0x1",
       token: "ETH",
       label: "Ethereum Mainnet",
-      rpcUrl: MAINNET_RPC_URL,
+      rpcUrl: "https://mainnet.infura.io/v3/17cd5a7fc4bb43c1b3e6f3b0017b5bc3",
     },
     {
       id: "0x13881",
@@ -41,7 +39,7 @@ const web3Onboard = Onboard({
       id: "0x89",
       token: "MATIC",
       label: "Polygon Mainnet",
-      rpcUrl: " https://polygon-rpc.com",
+      rpcUrl: "https://polygon-rpc.com",
     },
   ],
   appMetadata: {

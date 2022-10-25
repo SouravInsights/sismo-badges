@@ -1,15 +1,4 @@
-import { BadgeCard } from "./BadgeCard";
-import {
-  BadgeSectionWrapper,
-  BadgeSectionHeader,
-  BadgeList,
-} from "./BadgeCard.styles";
+import { BadgeListWrapper, BadgeImage } from "./Badge.styles";
 import { BadgeProfileHeader } from "./BadgeProfileHeader";
 
-export {
-  BadgeCard,
-  BadgeSectionWrapper,
-  BadgeList,
-  BadgeSectionHeader,
-  BadgeProfileHeader,
-};
+export { BadgeListWrapper, BadgeImage, BadgeProfileHeader };

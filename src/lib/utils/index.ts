@@ -54,19 +54,21 @@ export function getTokenBalance(
   return balance;
 }
 
-export const getTokens = (
+export const getNotZeroTokens = async (
   contract: Contract,
   address: string,
   tokenIds: number[]
 ) => {
-  tokenIds.map(async (tokenId) => {
-    const balance = await contract.balanceOf(address, tokenId);
-
-    let token = { balance: Number(balance), tokenId: tokenId };
-    console.log("token from the map function:", token);
-
-    return token;
-  });
+  const nonZeroTokenIds = await Promise.all(
+    tokenIds.map(async (tokenId) => {
+      const balance = await contract.balanceOf(address, tokenId);
+      if (balance > 0) {
+        return tokenId;
+      }
+      return null;
+    })
+  );
+  return nonZeroTokenIds.filter((balance) => balance !== null);
 };
 
 export const cleanAddress = (addr: string | undefined) => {
