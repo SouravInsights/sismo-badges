@@ -18,7 +18,7 @@ export const useENS = (address: string) => {
           const resolver = ensName ? await provider.getResolver(ensName) : null;
           let avatar = resolver ? await resolver.getAvatar() : null;
           setENSName(ensName);
-          setENSAvatar(avatar.url);
+          setENSAvatar(avatar?.url);
         } finally {
           setLoading(false);
         }

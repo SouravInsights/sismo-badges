@@ -10,7 +10,7 @@ import { Button, Checkbox, Modal } from "../../primitives";
 import { useOnboard } from "../../../wallet/hooks";
 
 export const HeroSection = () => {
-  const { connect, disconnect, isConnected, chainId, setChain } = useOnboard();
+  const { connect, isConnected, chainId, setChain } = useOnboard();
   const [isOpen, setModal] = useState(false);
 
   const [networkModalIsOpen, setNetworkModal] = useState(false);
@@ -36,10 +36,6 @@ export const HeroSection = () => {
     setNetworkModal(false);
   };
 
-  const handleDisconnect = async () => {
-    await disconnect();
-  };
-
   return (
     <HeroSectionWrapper>
       <HeroSectionContent>
@@ -48,45 +44,36 @@ export const HeroSection = () => {
             Connect your wallet to see your badges
           </HeroSectionContentHeader>
           <>
-            {isConnected ? (
-              <Button variant="primary" onClick={() => handleDisconnect()}>
-                Disconnect
-              </Button>
-            ) : (
-              <Button variant="primary" onClick={() => setModal(true)}>
-                Connect Wallet
-              </Button>
-            )}
+            <Button variant="primary" onClick={() => setModal(true)}>
+              Connect Wallet
+            </Button>
           </>
         </HeroSectionContentLeft>
         <img src="SismoVault.png" alt="sismo vault" />
       </HeroSectionContent>
 
       <div>
-        {isOpen && (
-          <Modal
-            isOpen={isOpen}
-            hideModal={() => setModal(false)}
-            title="Disclaimer"
-          >
-            <Checkbox
-              checked={checked}
-              onChange={handleCheckboxChange}
-              label={
-                "By connecting a wallet, you agree to the Terms of Use of this application"
-              }
-            />
-            {checked ? (
-              <Button variant="secondary" onClick={() => termsAccepted()}>
-                Understood
-              </Button>
-            ) : (
-              <Button disabled onClick={() => termsAccepted()}>
-                Understood
-              </Button>
-            )}
-          </Modal>
-        )}
+        <Modal
+          isOpen={isOpen}
+          hideModal={() => setModal(false)}
+          title="Disclaimer"
+        >
+          <Checkbox
+            checked={checked}
+            onChange={handleCheckboxChange}
+            label={
+              "By connecting a wallet, you agree to the Terms of Use of this application"
+            }
+          />
+          {checked ? (
+            <Button variant="secondary" onClick={() => termsAccepted()}>
+              Understood
+            </Button>
+          ) : (
+            <Button disabled>Understood</Button>
+          )}
+        </Modal>
+
         <div>
           <Modal
             hideModal={() => setNetworkModal(false)}
@@ -94,7 +81,7 @@ export const HeroSection = () => {
             title="Network not supported"
           >
             <p>Please switch to a supported network</p>
-            <Button variant="primary" onClick={handleNetwork}>
+            <Button variant="primary" onClick={() => handleNetwork()}>
               Polygon
             </Button>
           </Modal>

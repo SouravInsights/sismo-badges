@@ -39,7 +39,7 @@ export const BadgeSection = () => {
   });
 
   const wallet = useWallet();
-  const activeAddress = wallet.connectedList[0].accounts[0].address;
+  const activeAddress = wallet?.connectedList[0]?.accounts[0]?.address;
 
   const truncatedAddress = truncateAddress(activeAddress);
 
@@ -54,23 +54,25 @@ export const BadgeSection = () => {
 
   useEffect(() => {
     async function fetchNonZeroTokenBalances() {
-      const nonZeroTokenIds = await Promise.all(
-        playgroundEnvData?.items.map(async (token) => {
-          const balance = await getTokenBalance(
-            sismoPolygonBadgeContract,
-            activeAddress,
-            token.collectionId
-          );
-          if (balance > 0) {
-            return token.collectionId;
-          }
-          return null;
-        })
-      );
-      const filteredTokenIds = nonZeroTokenIds.filter(
-        (balance) => balance !== null
-      );
-      setPlaygroundMintedBadgeIds(filteredTokenIds);
+      if (playgroundEnvData?.items) {
+        const nonZeroTokenIds = await Promise.all(
+          playgroundEnvData?.items?.map(async (token) => {
+            const balance = await getTokenBalance(
+              sismoPolygonBadgeContract,
+              activeAddress,
+              token.collectionId
+            );
+            if (balance > 0) {
+              return token.collectionId;
+            }
+            return null;
+          })
+        );
+        const filteredTokenIds = nonZeroTokenIds?.filter(
+          (balance) => balance !== null
+        );
+        setPlaygroundMintedBadgeIds(filteredTokenIds);
+      }
     }
 
     fetchNonZeroTokenBalances();
@@ -102,23 +104,25 @@ export const BadgeSection = () => {
 
   useEffect(() => {
     async function fetchNonZeroTokenBalances() {
-      const nonZeroTokenIds = await Promise.all(
-        curatedEnvData?.items.map(async (token) => {
-          const balance = await getTokenBalance(
-            sismoCuratedBadgeContract,
-            activeAddress,
-            token.collectionId
-          );
-          if (balance > 0) {
-            return token.collectionId;
-          }
-          return null;
-        })
-      );
-      const filteredTokenIds = nonZeroTokenIds.filter(
-        (balance) => balance !== null
-      );
-      setCuratedBadgeIds(filteredTokenIds);
+      if (curatedEnvData?.items) {
+        const nonZeroTokenIds = await Promise.all(
+          curatedEnvData?.items.map(async (token) => {
+            const balance = await getTokenBalance(
+              sismoCuratedBadgeContract,
+              activeAddress,
+              token.collectionId
+            );
+            if (balance > 0) {
+              return token.collectionId;
+            }
+            return null;
+          })
+        );
+        const filteredTokenIds = nonZeroTokenIds?.filter(
+          (balance) => balance !== null
+        );
+        setCuratedBadgeIds(filteredTokenIds);
+      }
     }
 
     fetchNonZeroTokenBalances();

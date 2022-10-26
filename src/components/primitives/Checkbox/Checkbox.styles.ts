@@ -35,13 +35,13 @@ export const SelectedCheckbox = styled.div<any>`
   display: flex;
   justify-items: center;
   align-items: center;
-  width: 11.31px;
-  height: 11.31px;
+  width: 10px;
+  height: 10px;
 
   background: ${(props) => (props.checked ? "#1a1f34" : "#3F4973")};
 
   padding: 4px;
-  border-radius: 3px;
+  border-radius: 4px;
   transition: all 150ms;
 
   ${CheckboxIcon} {

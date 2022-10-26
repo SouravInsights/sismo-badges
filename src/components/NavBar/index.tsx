@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavbarContainer, NavButtonContainer } from "./NavBar.styles";
 import { Logo } from "../Logo";
 import { Button } from "../primitives";
@@ -20,8 +21,14 @@ const NavButton = ({ leftIcon, label, rightIcon, onClick }) => {
 export const NavBar = () => {
   const wallet = useWallet();
   const { disconnect, connectedList } = useOnboard();
+  const [activeAddress, setActiveAddress] = useState("");
 
-  const activeAddress = connectedList[0]?.accounts[0].address;
+  useEffect(() => {
+    if (wallet?.isConnected) {
+      const activeAddress = connectedList[0]?.accounts[0]?.address;
+      setActiveAddress(activeAddress);
+    }
+  }, [wallet.isConnected, connectedList]);
 
   const { ensName } = useENS(activeAddress);
   return (

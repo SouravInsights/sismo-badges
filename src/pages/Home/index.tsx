@@ -6,6 +6,6 @@ import { useWallet } from "../../wallet";
 export default function Home(): JSX.Element {
   const wallet = useWallet();
   return (
-    <Layout>{wallet.isConnected ? <BadgeSection /> : <HeroSection />}</Layout>
+    <Layout>{wallet?.isConnected ? <BadgeSection /> : <HeroSection />}</Layout>
   );
 }
