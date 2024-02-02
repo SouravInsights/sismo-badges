@@ -21,84 +21,132 @@ const StyledTooltip = styled.span.attrs((p: any) => p)`
   display: inline-block;
   white-space: wrap;
   opacity: ${(p) => p.show};
-  transform-origin: ${(p) => position(p.placment).negate()};
+  transform-origin: ${(p) => createPosition(p.placment).negate()};
 `;
 
-const position = (p) => ({
-  current: p,
-  negate() {
-    if (this.current === "left") return "right";
-    if (this.current === "right") return "left";
-    if (this.current === "top") return "bottom";
-    if (this.current === "bottom") return "top";
-  },
-  isHorizontal() {
-    return this.current === "left" || this.current === "right";
-  },
-  isVertical() {
-    return this.current === "top" || this.current === "bottom";
-  },
-});
+// Function to create a position utility object
+const createPosition = (current: string) => {
+  // Mapping object for negating positions
+  const negateMap = {
+    left: "right",
+    right: "left",
+    top: "bottom",
+    bottom: "top",
+  };
 
-const point = () => ({
+  // Object with current position and utility methods
+  return {
+    current,
+    // Method to get the negated position
+    negate: () => negateMap[current],
+    // Check if the current position is horizontal
+    isHorizontal: () => ["left", "right"].includes(current),
+    // Check if the current position is vertical
+    isVertical: () => ["top", "bottom"].includes(current),
+  };
+};
+
+// Interface representing a point with x and y coordinates
+interface Point {
+  x: number | null;
+  y: number | null;
+  // Set x and y coordinates
+  setCoordinates: (coordinates: { x: number; y: number }) => void;
+  // Restrict x and y coordinates to a given rectangle
+  restrictToRect: (rect: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  }) => void;
+}
+
+// Utility function to create a point-like object
+const createPoint = (): Point => ({
   x: null,
   y: null,
-  reset(p) {
-    this.x = p.x;
-    this.y = p.y;
+  setCoordinates({ x, y }) {
+    this.x = x;
+    this.y = y;
   },
-  restrictRect(rect) {
-    if (this.x < rect.l) this.x = rect.l;
-    else if (this.x > rect.r) this.x = rect.r;
-    if (this.y < rect.t) this.y = rect.t;
-    else if (this.y > rect.b) this.y = rect.b;
+  restrictToRect({ left, top, right, bottom }) {
+    this.x = Math.max(left, Math.min(this.x!, right));
+    this.y = Math.max(top, Math.min(this.y!, bottom));
   },
 });
 
-const getPoint = (el, tt, placement, sideOffset) => {
-  let recurCount = 0;
-  const pt = point();
-  const bdys = {
-    l: sideOffset,
-    t: sideOffset,
-    r: document.body.clientWidth - (tt.clientWidth + sideOffset),
-    b: window.innerHeight - (tt.clientHeight + sideOffset),
+// Main function to calculate tooltip position
+const calculateTooltipPosition = (
+  target: HTMLElement,
+  tooltip: HTMLElement,
+  placement: string,
+  sideOffset: number
+): Point => {
+  // Create a point-like object to represent tooltip position
+  const tooltipPosition = createPoint();
+  // Define boundaries of the viewport
+  const boundaries = {
+    left: sideOffset,
+    top: sideOffset,
+    right: document.body.clientWidth - (tooltip.clientWidth + sideOffset),
+    bottom: window.innerHeight - (tooltip.clientHeight + sideOffset),
   };
-  const elRect = el.getBoundingClientRect();
+  // Get bounding rectangle of the target element
+  const targetRect = target.getBoundingClientRect();
+  // Get position information based on the specified placement
+  const positionInfo = createPosition(placement);
 
-  return (function recursive(placement) {
-    recurCount++;
-    const pos = position(placement);
-    switch (pos.current) {
+  // Attempt to calculate position up to three times
+  for (let attempt = 0; attempt < 3; attempt++) {
+    switch (positionInfo.current) {
       case "left":
-        pt.x = elRect.left - (tt.offsetWidth + sideOffset);
-        pt.y = elRect.top + (el.offsetHeight - tt.offsetHeight) / 2;
+        // Calculate tooltip position to the left of the target element
+        tooltipPosition.setCoordinates({
+          x: targetRect.left - (tooltip.offsetWidth + sideOffset),
+          y: targetRect.top + (target.offsetHeight - tooltip.offsetHeight) / 2,
+        });
         break;
       case "right":
-        pt.x = elRect.right + sideOffset;
-        pt.y = elRect.top + (el.offsetHeight - tt.offsetHeight) / 2;
+        // Calculate tooltip position to the right of the target element
+        tooltipPosition.setCoordinates({
+          x: targetRect.right + sideOffset,
+          y: targetRect.top + (target.offsetHeight - tooltip.offsetHeight) / 2,
+        });
         break;
       case "top":
-        pt.x = elRect.left + (el.offsetWidth - tt.offsetWidth) / 2;
-        pt.y = elRect.top - (tt.offsetHeight + sideOffset);
+        // Calculate tooltip position above the target element
+        tooltipPosition.setCoordinates({
+          x: targetRect.left + (target.offsetWidth - tooltip.offsetWidth) / 2,
+          y: targetRect.top - (tooltip.offsetHeight + sideOffset),
+        });
         break;
-      default:
-        pt.x = elRect.left + (el.offsetWidth - tt.offsetWidth) / 2;
-        pt.y = elRect.bottom + sideOffset;
+      default: // "bottom"
+        // Calculate tooltip position below the target element
+        tooltipPosition.setCoordinates({
+          x: targetRect.left + (target.offsetWidth - tooltip.offsetWidth) / 2,
+          y: targetRect.bottom + sideOffset,
+        });
     }
 
-    if (recurCount < 3)
-      if (
-        (pos.isHorizontal() && (pt.x < bdys.l || pt.x > bdys.r)) ||
-        (pos.isVertical() && (pt.y < bdys.t || pt.y > bdys.b))
-      ) {
-        pt.reset(recursive(pos.negate()));
-      }
+    // Break the loop if the position is within boundaries
+    if (
+      tooltipPosition.x! >= boundaries.left &&
+      tooltipPosition.x! <= boundaries.right &&
+      tooltipPosition.y! >= boundaries.top &&
+      tooltipPosition.y! <= boundaries.bottom
+    ) {
+      break;
+    }
 
-    pt.restrictRect(bdys);
+    // Try the opposite position in the next attempt
+    positionInfo.current = positionInfo.negate();
+  }
 
-    return pt;
-  })(placement);
+  // Restrict tooltip position to the viewport boundaries
+  tooltipPosition.restrictToRect(boundaries);
+
+  // Return the calculated tooltip position
+  return tooltipPosition;
 };
 
 export const ToolTip = ({
@@ -114,7 +162,7 @@ export const ToolTip = ({
 
   const handleMOver = (e) => {
     setShow(1);
-    posRef.current = getPoint(
+    posRef.current = calculateTooltipPosition(
       e.currentTarget,
       tooltipRef.current,
       placement,
